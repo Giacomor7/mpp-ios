@@ -48,13 +48,29 @@ struct ContentView: View {
                 .frame(width: 150)
             }
             Button("Submit") {
-                
+                if departStation == nil || arrivalStation == nil {
+                    print("select departure and arrival stations")
+                }
+                else {
+                    let urlString = getUrl(departStation!, arrivalStation!)
+                    if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+                        UIApplication.shared.open(url)
+                    }
+                }
             }
             .padding()
             .font(.title3)
             Spacer()
         }
         .padding()
+    }
+    func getUrl(_ departStation: Station, _ arrivalStation: Station) -> String {
+        var url = "https://www.lner.co.uk/travel-information/travelling-now/live-train-times/depart/"
+        url += departStation.id
+        url += "/"
+        url += arrivalStation.id
+        url += "/#LiveDepResults"
+        return url
     }
 }
 
