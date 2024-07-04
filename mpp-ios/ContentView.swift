@@ -13,6 +13,7 @@ struct Station: Identifiable, Hashable {
 }
 
 struct ContentView: View {
+    @State private var showingAlert = false
     
     var stations = [
         Station(name: "London Kings Cross", id: "KGX"),
@@ -49,7 +50,7 @@ struct ContentView: View {
             }
             Button("Submit") {
                 if departStation == nil || arrivalStation == nil {
-                    print("select departure and arrival stations")
+                    showingAlert = true
                 }
                 else {
                     let urlString = getUrl(departStation!, arrivalStation!)
@@ -57,6 +58,9 @@ struct ContentView: View {
                         UIApplication.shared.open(url)
                     }
                 }
+            }
+            .alert("Select departure and arrival stations", isPresented: $showingAlert) {
+                Button("OK", role: .cancel) { }
             }
             .padding()
             .font(.title3)
