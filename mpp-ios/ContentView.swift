@@ -13,17 +13,21 @@ struct Station: Identifiable, Hashable {
 }
 
 struct ContentView: View {
-    @State private var showingAlert = false
     
-    var stations = [
+    let stations = [
         Station(name: "London Kings Cross", id: "KGX"),
         Station(name: "Edinburgh Waverley", id: "EDB"),
         Station(name: "Newcastle", id: "NCL"),
         Station(name: "York", id: "YRK"),
         Station(name: "Leeds", id: "LDS")
     ]
+    // Enter API key
+    let API_KEY = ""
+    
+    @State private var showingAlert = false
     @State private var departStation: Station? = nil
     @State private var arrivalStation: Station? = nil
+    
     
     var body: some View {
         VStack {
@@ -60,15 +64,44 @@ struct ContentView: View {
     }
     
     private var submitButton: some View {
-        Button("Submit") {
+        Button {
             if departStation == nil || arrivalStation == nil {
                 showingAlert = true
-            } else {
-                let urlString = getUrl(departStation!, arrivalStation!)
-                if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.open(url)
+            }
+            else {
+                Task {
+                    var urlStringBuilder = "https://mobile-api-softwire2.lner.co.uk/v1/fares?originStation="
+                    urlStringBuilder += departStation!.id
+                    urlStringBuilder += "&destinationStation="
+                    urlStringBuilder += arrivalStation!.id
+                    urlStringBuilder += "&outboundDateTime="
+                    
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                    urlStringBuilder += formatter.string(from: Date())
+                    
+                    urlStringBuilder += "&numberOfChildren=0&numberOfAdults=1"
+                    
+                    if let url = URL(string: urlStringBuilder) {
+                        var request = URLRequest(url: url)
+                        request.addValue(API_KEY, forHTTPHeaderField: "x-api-key")
+                        
+                        let config = URLSessionConfiguration.default
+                        let session = URLSession(configuration: config)
+                        
+                        let task = session.dataTask(with: request) { (data, response, error) in
+                            
+                        }
+                        task.resume()
+                        
+                    }
+                    
+                    //                        let decodedResponse = try? JSONDecoder().decode(Joke.self, from: data)
+                    //                        var response = decodedResponse?.value ?? ""
                 }
             }
+        } label: {
+            Text("Submit")
         }
         .alert("Select departure and arrival stations", isPresented: $showingAlert) {
             Button("OK", role: .cancel) { }
