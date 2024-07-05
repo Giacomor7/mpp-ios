@@ -33,48 +33,48 @@ struct ContentView: View {
                 .padding(.all)
             
             HStack {
-                Picker("Select departure station", selection: $departStation) {
-                    Text("Select departure...").tag(Optional<Station>(nil))
-                    ForEach(stations) { station in
-                        Text(station.name).tag(station as Station?)
-                    }
-                }
-                .frame(width: 150)
-                Picker("Select arrival station", selection: $arrivalStation) {
-                    Text("Select arrival...").tag(Optional<Station>(nil))
-                    ForEach(stations) { station in
-                        Text(station.name).tag(station as Station?)
-                    }
-                }
-                .frame(width: 150)
+              stationPicker(title: "Select departure...", selection: $departStation)
+              stationPicker(title: "Select arrival...", selection: $arrivalStation)
             }
-            Button("Submit") {
-                if departStation == nil || arrivalStation == nil {
-                    showingAlert = true
-                }
-                else {
-                    let urlString = getUrl(departStation!, arrivalStation!)
-                    if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-                        UIApplication.shared.open(url)
-                    }
-                }
-            }
-            .alert("Select departure and arrival stations", isPresented: $showingAlert) {
-                Button("OK", role: .cancel) { }
-            }
-            .padding()
-            .font(.title3)
+            submitButton
             Spacer()
         }
         .padding()
     }
+    
     func getUrl(_ departStation: Station, _ arrivalStation: Station) -> String {
-        var url = "https://www.lner.co.uk/travel-information/travelling-now/live-train-times/depart/"
-        url += departStation.id
-        url += "/"
-        url += arrivalStation.id
-        url += "/#LiveDepResults"
-        return url
+        return "https://www.lner.co.uk/travel-information/travelling-now/live-train-times/depart/\(departStation.id)/\(arrivalStation.id)/#LiveDepResults"
+    }
+    
+    private func stationPicker(title: String, selection: Binding<Station?>) -> some View {
+        Picker(title, selection: selection) {
+            Text(title).tag(Optional<Station>(nil))
+            ForEach(stations) { station in
+                Text(station.name).tag(station as Station?)
+            }
+        }
+        .frame(
+            minWidth: 0,
+            maxWidth: .infinity
+        )
+    }
+    
+    private var submitButton: some View {
+        Button("Submit") {
+            if departStation == nil || arrivalStation == nil {
+                showingAlert = true
+            } else {
+                let urlString = getUrl(departStation!, arrivalStation!)
+                if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        }
+        .alert("Select departure and arrival stations", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        }
+        .padding()
+        .font(.title3)
     }
 }
 
