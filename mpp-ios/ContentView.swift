@@ -7,22 +7,17 @@
 
 import SwiftUI
 
-struct Station: Identifiable, Hashable {
-    let name: String
-    let id: String
-}
-
 struct ContentView: View {
     
     let stations = [
-        Station(name: "London Kings Cross", id: "KGX"),
-        Station(name: "Edinburgh Waverley", id: "EDB"),
-        Station(name: "Newcastle", id: "NCL"),
-        Station(name: "York", id: "YRK"),
-        Station(name: "Leeds", id: "LDS")
+        Station(displayName: "London Kings Cross", crs: "KGX"),
+        Station(displayName: "Edinburgh Waverley", crs: "EDB"),
+        Station(displayName: "Newcastle", crs: "NCL"),
+        Station(displayName: "York", crs: "YRK"),
+        Station(displayName: "Leeds", crs: "LDS")
     ]
     // Enter API key
-    let API_KEY = ""
+    let API_KEY = "hahauwish"
     
     @State private var showingAlert = false
     @State private var departStation: Station? = nil
@@ -54,7 +49,7 @@ struct ContentView: View {
         Picker(title, selection: selection) {
             Text(title).tag(Optional<Station>(nil))
             ForEach(stations) { station in
-                Text(station.name).tag(station as Station?)
+                Text(station.displayName).tag(station as Station?)
             }
         }
         .frame(
@@ -91,13 +86,17 @@ struct ContentView: View {
                         
                         let task = session.dataTask(with: request) { (data, response, error) in
                             
+                            do{
+                                let decodedResponse = try JSONDecoder().decode(Result.self, from: data!)
+                                let depart = decodedResponse.outboundJourneys[0]
+                                    .originStation.displayName
+                                print(depart)
+                            }catch {
+                                print("error: ", error)
+                            }
                         }
                         task.resume()
-                        
                     }
-                    
-                    //                        let decodedResponse = try? JSONDecoder().decode(Joke.self, from: data)
-                    //                        var response = decodedResponse?.value ?? ""
                 }
             }
         } label: {
